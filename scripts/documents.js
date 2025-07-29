@@ -1,53 +1,49 @@
-const documents = [
-    { "id": 1, "name": "Documento 1", "url": "https://example.com/doc1" },
-    { "id": 2, "name": "Documento 2", "url": "https://example.com/doc2" },
-    { "id": 3, "name": "Documento 3", "url": "https://example.com/doc3" },
-]
+// scripts/documents.js
 
-function loadCSV() {
-    fetch('/data.csv')
-        .then(response => response.text())
-        .then(text => {
-            const lines = text.trim().split('\n');
-            const headers = lines[0].split(',');
-            const result = lines.slice(1).map(line => {
-                const values = line.split(',');
-                return headers.reduce((obj, header, i) => {
-                    obj[header.trim()] = values[i].trim();
-                    return obj;
-                }, {});
+async function loadDocuments() {
+    try {
+        const response = await fetch('./scripts/documents.csv');
+        const text = await response.text();
+        const lines = text.trim().split('\n');
+        const headers = lines[0].split(';').map(h => h.trim());
+        const data = lines.slice(1).map(line => {
+            const values = line.split(';').map(v => v.trim());
+            const obj = {};
+            headers.forEach((header, i) => {
+                obj[header] = values[i] || '';
             });
-            console.log(result);
-            return result;
-        })
-        .catch(error => {
-            console.error('Error loading CSV:', error);
+            return obj;
         });
-}
 
-function populateTable(data) {
-    const table = document.getElementById('data-table');
-    data.forEach(item => {
-        const row = document.createElement('tr');
-        const cellId = document.createElement('th');
-        const cellName = document.createElement('td');
-        const cellUrl = document.createElement('td');
+        const table = document.getElementById('data-table');
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            const cellId = document.createElement('th');
+            const cellDoc = document.createElement('td');
+            const cellUrl = document.createElement('td');
 
-        cellId.scope = 'row';
-        cellId.textContent = item.id;
-        
-        cellName.textContent = item.name;
-        const link = document.createElement('a');
-        link.href = item.url;
-        link.textContent = 'View Document';
-        link.target = '_blank';
-        cellUrl.appendChild(link);
-        
-        row.appendChild(cellId);
-        row.appendChild(cellName);
-        row.appendChild(cellUrl);
-        table.appendChild(row);
-    });
+            cellId.scope = 'row';
+            cellId.textContent = item.id || '';
+
+            cellDoc.textContent = item.doc || '';
+            const link = document.createElement('a');
+            link.href = item.link || '#';
+            link.textContent = 'View Document';
+            link.target = '_blank';
+            cellUrl.appendChild(link);
+
+            row.appendChild(cellId);
+            row.appendChild(cellDoc);
+            row.appendChild(cellUrl);
+            table.appendChild(row);
+        });
+
+        console.log(JSON.stringify(data, null, 2));
+        return data;
+    } catch (error) {
+        console.error('Error loading CSV:', error);
+        return [];
+    }
 }
 
 
@@ -79,4 +75,4 @@ form.addEventListener('submit', function(event) {
     searchTable(textInput.value);
 });
 
-populateTable(documents);
+loadDocuments();
