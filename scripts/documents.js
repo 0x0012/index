@@ -26,11 +26,16 @@ async function loadDocuments() {
             cellId.textContent = item.id || '';
 
             cellDoc.textContent = item.doc || '';
-            const link = document.createElement('a');
-            link.href = item.link || '#';
-            link.textContent = 'View Document';
-            link.target = '_blank';
-            cellUrl.appendChild(link);
+            const button = document.createElement('button');
+            button.textContent = 'Ver Documento';
+            button.type = 'button';
+            button.className = 'btn btn-primary btn-sm';
+            button.onclick = () => {
+                if (item.link) {
+                    window.open(item.link, '_blank');
+                }
+            };
+            cellUrl.appendChild(button);
 
             row.appendChild(cellId);
             row.appendChild(cellDoc);
